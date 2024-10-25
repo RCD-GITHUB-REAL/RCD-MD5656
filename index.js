@@ -47,6 +47,7 @@ if (!fs.existsSync(sessionDir)) {
     fs.mkdirSync(sessionDir, { recursive: true });
 }
 
+// Download session data from the given URL if it doesn't exist locally
 async function downloadSessionData() {
     if (!config.SESSION_ID) {
         console.error('Please add your session to SESSION_ID env !!');
@@ -90,7 +91,7 @@ async function start() {
         Matrix.ev.on('connection.update', (update) => {
             const { connection, lastDisconnect } = update;
             if (connection === 'close') {
-                if (lastDisconnect.error?.output?.statusCode === DisconnectReason.loggedOut) {
+                if (lastDisconnect?.error?.output?.statusCode === DisconnectReason.loggedOut) {
                     console.log(chalk.red("🤖 The bot has been logged out! Please scan QR code to log in again."));
                     process.exit(0); // Stop the process if logged out
                 } else {
@@ -144,7 +145,6 @@ async function start() {
             try {
                 const mek = chatUpdate.messages[0];
                 if (!mek.key.fromMe && config.AUTO_REACT) {
-                    console.log(mek);
                     if (mek.message) {
                         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                         await doReact(randomEmoji, mek, Matrix);
@@ -160,6 +160,7 @@ async function start() {
     }
 }
 
+// Initialize and start the bot
 async function init() {
     if (fs.existsSync(credsPath)) {
         console.log("🔒 Session file found, proceeding without QR code.");
